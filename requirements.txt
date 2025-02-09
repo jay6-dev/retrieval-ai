@@ -1,0 +1,8 @@
+gradio
+torch
+transformers
+faiss-cpu
+numpy
+pillow
+tqdm
+kagglehub
