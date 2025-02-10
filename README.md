@@ -25,12 +25,12 @@ Speech-to-Text Input: Allows visually impaired users to speak their queries inst
 ## Installation
 ### Prerequisites
 Python 3.8+
-Required dependencies (see `requirements.txt` if available)
+Required dependencies (see `requirements.txt`)
 
 ### Setup
 1. Clone the repository:
    
-   git clone https://github.com/yourusername/retrieval-ai.git
+   git clone https://github.com/jay6-dev/retrieval-ai.git
    cd retrieval-ai
    
 2. Install dependencies:
