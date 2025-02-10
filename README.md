@@ -27,7 +27,13 @@ Speech-to-Text Input: Allows visually impaired users to speak their queries inst
 Python 3.8+
 Required dependencies (see `requirements.txt`)
 
-### Setup
+### Running App
+Follow hugging face link for best app experience ( Recommended)
+
+https://huggingface.co/spaces/joy1515/retrieval-ai
+
+OR
+
 1. Clone the repository:
    
    git clone https://github.com/jay6-dev/retrieval-ai.git
