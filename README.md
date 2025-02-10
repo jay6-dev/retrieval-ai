@@ -3,8 +3,20 @@
 ## Overview
 Retrieval-AI is a simple image retrieval application using a CLIP model and FAISS indexing. It allows users to search for images based on text queries and provides accessibility features such as dark mode and speech-to-text for visually impaired users.
 
+[Retrieval - AI diagram.pdf](https://github.com/user-attachments/files/18730335/Retrieval.-.AI.diagram.pdf)
+
+## Explanation:
+1. User Inputs: The user enters a query through text or voice.
+2. Gradio UI: The interface processes the input.
+3. Speech-to-Text (STT): Converts voice input into text.
+4. CLIP Model: Encodes the text query into embeddings.
+5. FAISS Index: Searches for the most similar images.
+6. Results Gallery: Displays the matched images.
+7. Text-to-Speech (TTS): Reads out image descriptions for accessibility.
+8. User Receives Output: Views images or listens to results.
+
 ## Features
-Text-based Image Search: Users can input a text query to find matching images.
+Text-based Image Search: Users can input a query to find matching images.
 Adjustable Results Count: Users can select how many results to display.
 Example Queries: Predefined queries help users get started.
 Dark Mode Support: Enhances usability in low-light conditions.
