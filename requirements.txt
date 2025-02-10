@@ -6,3 +6,6 @@ numpy
 pillow
 tqdm
 kagglehub
+SpeechRecognition==3.8.1
+SpeechRecognition
+gtts
