@@ -12,6 +12,8 @@ from tqdm import tqdm
 import speech_recognition as sr
 from gtts import gTTS
 import tempfile
+import torch.nn.utils.prune as prune
+import random
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -25,37 +27,50 @@ class ImageSearchSystem:
         # Load CLIP model
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch16")
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch16").to(self.device)
+
+        # Prune the model (optimize memory usage)
+        for name, module in self.model.named_modules():
+            if isinstance(module, torch.nn.Linear):
+                prune.l1_unstructured(module, name='weight', amount=0.2)
         
         # Initialize dataset
         self.image_paths = []
         self.index = None
         self.initialized = False
-        
+    
     def initialize_dataset(self) -> None:
-        """Download and process dataset"""
+        """Automatically download and process the dataset with a 500-sample limit."""
         try:
-            path = kagglehub.dataset_download("alessandrasala79/ai-vs-human-generated-dataset")
-            image_folder = os.path.join(path, 'test_data_v2')
+            logger.info("Downloading dataset from KaggleHub...")
+            dataset_path = kagglehub.dataset_download("alessandrasala79/ai-vs-human-generated-dataset")
+
+            image_folder = os.path.join(dataset_path, 'test_data_v2')  # Adjust if needed
             
-            self.image_paths = [
-                f for f in Path(image_folder).glob("**/*") 
-                if f.suffix.lower() in ['.jpg', '.jpeg', '.png']
-            ]
+            # Validate dataset
+            if not os.path.exists(image_folder):
+                raise FileNotFoundError(f"Expected dataset folder not found: {image_folder}")
             
-            if not self.image_paths:
-                raise ValueError(f"No images found in {image_folder}")
+            # Load images dynamically
+            all_images = [f for f in Path(image_folder).glob("**/*") if f.suffix.lower() in ['.jpg', '.jpeg', '.png']]
             
-            logger.info(f"Found {len(self.image_paths)} images")
-            
+            if not all_images:
+                raise ValueError("No images found in the dataset!")
+
+            # Limit dataset to 500 randomly selected samples
+            self.image_paths = random.sample(all_images, min(500, len(all_images)))
+
+            logger.info(f"Loaded {len(self.image_paths)} images (limited to 500 samples).")
+
+            # Create image index
             self._create_image_index()
             self.initialized = True
-            
+        
         except Exception as e:
             logger.error(f"Dataset initialization failed: {str(e)}")
             raise
 
     def _create_image_index(self, batch_size: int = 32) -> None:
-        """Create FAISS index"""
+        """Create FAISS index for fast image retrieval."""
         try:
             all_features = []
             
@@ -83,7 +98,7 @@ class ImageSearchSystem:
             raise
 
     def search(self, query: str, audio_path: str = None, k: int = 5):
-        """Search for images using text or speech"""
+        """Search for images using text or speech."""
         try:
             if not self.initialized:
                 raise RuntimeError("System not initialized. Call initialize_dataset() first.")
@@ -122,7 +137,7 @@ class ImageSearchSystem:
             return [], "Error during search.", None
 
 def create_demo_interface() -> gr.Interface:
-    """Create Gradio interface with dark mode & speech support"""
+    """Create Gradio interface with dark mode & speech support."""
     system = ImageSearchSystem()
     
     try:
@@ -143,7 +158,7 @@ def create_demo_interface() -> gr.Interface:
         fn=system.search,
         inputs=[
             gr.Textbox(label="Enter your search query:", placeholder="Describe the image...", lines=2),
-            gr.Audio(source="microphone", type="filepath", label="Speak Your Query (Optional)")
+            gr.Audio(sources=["microphone"], type="filepath", label="Speak Your Query (Optional)")
         ],
         outputs=[
             gr.Gallery(label="Search Results", show_label=True, columns=5, height="auto"),
@@ -161,7 +176,17 @@ def create_demo_interface() -> gr.Interface:
 if __name__ == "__main__":
     try:
         demo = create_demo_interface()
-        demo.launch(share=True, enable_queue=True, max_threads=40)
+        demo.launch(share=True, max_threads=40)
     except Exception as e:
         logger.error(f"Failed to launch app: {str(e)}")
         raise
+
+
+
+              
+            
+            
+            
+       
+                     
+
